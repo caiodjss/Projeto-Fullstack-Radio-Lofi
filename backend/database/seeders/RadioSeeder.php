@@ -11,10 +11,10 @@ class RadioSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Criar Artistas Mock
+        // 1. Criar Artistas
         $artist1 = Artist::create([
-            'name' => 'Komorebi Beats',
-            'avatar_url' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+            'name' => 'Lucas Lazari',
+            'avatar_url' => 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80',
             'social_link' => 'https://soundcloud.com',
         ]);
 
@@ -38,11 +38,11 @@ class RadioSeeder extends Seeder
 
         // 2. Criar Estações Temáticas
         $stationLofi = Station::create([
-            'name' => 'Lo-Fi Chill & Study',
+            'name' => 'Lo-Fi Chill & 8-Bit',
             'slug' => 'lofi-chill',
-            'description' => 'Batidas calmas e aconchegantes para foco, leitura e relaxamento profundo.',
-            'theme_color' => '#8b5cf6', // Violeta / Roxo
-            'background_url' => 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=1920&auto=format&fit=crop&q=80',
+            'description' => 'Aventuras em pixel art, tons alegres e batidas nostálgicas para foco e energia.',
+            'theme_color' => '#38bdf8', // Ciano Claro / Sky Blue vibrante de 8-bit
+            'background_url' => 'http://localhost:8000/backgrounds/Chico_8_Bits-ANIMATION.gif',
             'is_active' => true,
         ]);
 
@@ -50,8 +50,8 @@ class RadioSeeder extends Seeder
             'name' => 'Vaporwave Nostalgia',
             'slug' => 'vaporwave',
             'description' => 'Sintetizadores retrô, estética anos 80 e ecos do futuro analógico.',
-            'theme_color' => '#ec4899', // Rosa Neon
-            'background_url' => 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&auto=format&fit=crop&q=80',
+            'theme_color' => '#ec4899',
+            'background_url' => 'http://localhost:8000/backgrounds/Jorge_8_Bits-ANIMATION.gif', // Usando seu 2º GIF
             'is_active' => true,
         ]);
 
@@ -59,7 +59,7 @@ class RadioSeeder extends Seeder
             'name' => 'Lo-Fi Bossa & Brasil',
             'slug' => 'lofi-br',
             'description' => 'A suavidade do violão brasileiro fundida com grooves lo-fi contemporâneos.',
-            'theme_color' => '#10b981', // Verde Esmeralda
+            'theme_color' => '#10b981',
             'background_url' => 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=1920&auto=format&fit=crop&q=80',
             'is_active' => true,
         ]);
@@ -68,28 +68,27 @@ class RadioSeeder extends Seeder
             'name' => 'Midnight R&B',
             'slug' => 'midnight-rnb',
             'description' => 'Batidas intimistas e melódicas perfeitas para as madrugadas.',
-            'theme_color' => '#3b82f6', // Azul Noturno
+            'theme_color' => '#3b82f6',
             'background_url' => 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&auto=format&fit=crop&q=80',
             'is_active' => true,
         ]);
 
-        // 3. Criar Faixas de Áudio (Links MP3 públicos para teste)
-        // Estação: Lo-Fi Chill
+        // 3. Faixas da Estação Lo-Fi Chill & 8-Bit (Arquivos locais em public/audio)
         Track::create([
             'station_id' => $stationLofi->id,
             'artist_id' => $artist1->id,
-            'title' => 'Rainy Window Tape',
-            'audio_url' => 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-            'duration_seconds' => 372,
+            'title' => 'New Wings',
+            'audio_url' => 'http://localhost:8000/audio/Lucas%20Lazari%20-%20New%20Wings.mp3',
+            'duration_seconds' => 148,
             'is_active' => true,
         ]);
 
         Track::create([
             'station_id' => $stationLofi->id,
             'artist_id' => $artist1->id,
-            'title' => 'Warm Coffee Steam',
-            'audio_url' => 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-            'duration_seconds' => 423,
+            'title' => 'Cat Naps',
+            'audio_url' => 'http://localhost:8000/audio/us%20-%20cat%20naps.mp3',
+            'duration_seconds' => 125,
             'is_active' => true,
         ]);
 

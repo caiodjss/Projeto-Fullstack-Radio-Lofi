@@ -10,3 +10,18 @@ html, body, #root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
 }
+
+@keyframes bounceBar {
+  0%, 100% {
+    height: 6px;
+    opacity: 0.4;
+  }
+  50% {
+    height: 38px;
+    opacity: 1;
+  }
+}
+
+.animate-bounce-bar {
+  animation: bounceBar ease-in-out infinite alternate;
+}
