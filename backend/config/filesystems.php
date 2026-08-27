@@ -59,6 +59,17 @@ return [
             'throw' => false,
             'report' => false,
         ],
+                'r2' => [
+            'driver' => 's3',
+            'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+            'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('CLOUDFLARE_R2_BUCKET'),
+            'url' => env('https://pub-c1380a9668c943e5b08ac47220bb1bfa.r2.dev'), 
+            'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+        ],
 
     ],
 

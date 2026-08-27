@@ -15,5 +15,8 @@ Route::get('/health', function () {
 
 // Endpoints públicos da Rádio
 Route::get('/stations', [StationController::class, 'index']);
-Route::get('/stations/{slug}', [StationController::class, 'show']);
+Route::post('/stations', [StationController::class, 'store']);
+
 Route::get('/tracks', [TrackController::class, 'index']);
+Route::post('/tracks', [TrackController::class, 'store']);
+Route::delete('/tracks/{id}', [TrackController::class, 'destroy']);

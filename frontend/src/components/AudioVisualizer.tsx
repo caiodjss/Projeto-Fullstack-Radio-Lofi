@@ -7,27 +7,29 @@ interface AudioVisualizerProps {
   stationSlug?: string;
 }
 
-// Ritmo base de cada estação (em segundos)
-// Menor = Mais rápido / Maior = Mais lento e calmo
 const STATION_SPEEDS: Record<string, number> = {
-  'lofi-chill': 1.1,     // Lento e relaxante
-  'vaporwave': 0.65,     // Médio/Animado com sintetizadores
-  'lofi-br': 0.9,        // Ritmo balançado de Bossa
-  'midnight-rnb': 1.4,   // Bem lento e atmosférico
+  'lofi-chill': 0.75,
+  'vaporwave': 0.6,
+  'lofi-br': 0.9,
+  'midnight-rnb': 1.4,
 };
 
 export const AudioVisualizer: FC<AudioVisualizerProps> = ({
   isPlaying,
-  barCount = 18,
-  themeColor = '#8b5cf6',
+  barCount = 48,
+  themeColor = '#38bdf8',
   stationSlug = 'lofi-chill',
 }) => {
-  // Pega a velocidade base da estação ativa (ou 1.0 como fallback)
   const baseSpeed = STATION_SPEEDS[stationSlug] || 1.0;
 
   const bars = Array.from({ length: barCount }, (_, i) => {
-    const duration = (baseSpeed * (0.8 + (i % 5) * 0.15)).toFixed(2);
-    const delay = ((i % 4) * (baseSpeed * 0.1)).toFixed(2);
+    // Curva de onda simétrica com centro mais alto
+    const mid = barCount / 2;
+    const distanceFromCenter = Math.abs(i - mid) / mid;
+    const factor = 1 - distanceFromCenter * 0.4;
+
+    const duration = (baseSpeed * (0.6 + (i % 6) * 0.12) * factor).toFixed(2);
+    const delay = ((i % 5) * 0.08).toFixed(2);
 
     return {
       id: i,
@@ -37,18 +39,18 @@ export const AudioVisualizer: FC<AudioVisualizerProps> = ({
   });
 
   return (
-    <div className="flex items-end justify-center gap-1.5 h-12 px-4 py-1">
+    <div className="flex items-end justify-center gap-1 sm:gap-1.5 h-14 w-full px-2">
       {bars.map((bar) => (
         <span
           key={bar.id}
-          className={`w-1 rounded-full transition-all duration-300 ${
-            isPlaying ? 'animate-bounce-bar' : 'h-1.5 opacity-40'
+          className={`flex-1 max-w-[5px] rounded-full transition-all duration-300 ${
+            isPlaying ? 'animate-bounce-bar' : 'h-1 opacity-30'
           }`}
           style={{
             backgroundColor: themeColor,
             animationDuration: bar.duration,
             animationDelay: bar.delay,
-            height: isPlaying ? undefined : '6px',
+            height: isPlaying ? undefined : '4px',
           }}
         />
       ))}
