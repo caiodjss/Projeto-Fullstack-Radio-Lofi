@@ -29,4 +29,4 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
 # 7. Script de inicialização respeitando $PORT e 0.0.0.0
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+CMD sh -c "php artisan config:clear && php artisan migrate --force || true; exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
