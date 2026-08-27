@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const baseURL = import.meta.env.VITE_API_URL || 'https://lofi-backend-production-221f.up.railway.app/api';
 
 export const api = {
   get: async <T>(
@@ -25,9 +25,11 @@ export const api = {
       url.searchParams.set(key, String(value));
     });
 
-    const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-      credentials: 'include',
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
