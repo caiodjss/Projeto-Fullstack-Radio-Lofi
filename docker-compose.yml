@@ -5,9 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: laravel_app
     restart: unless-stopped
-    working_dir: /var/www
+    working_dir: /app
     volumes:
-      - ./backend:/var/www
+      - ./backend:/app
     networks:
       - app-network
 
@@ -44,13 +44,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8000/api
     container_name: react_app
     restart: unless-stopped
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - "5173:80"
     networks:
       - app-network
 

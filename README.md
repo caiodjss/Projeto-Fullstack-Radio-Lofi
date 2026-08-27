@@ -130,6 +130,36 @@ VITE_API_URL=http://localhost:8000/api
 
 Quando a aplicação for executada em outro domínio ou porta, ajuste esse valor antes de iniciar o Vite.
 
+No Railway, configure `VITE_API_URL` como variável de build do serviço frontend, por exemplo:
+
+```env
+VITE_API_URL=https://seu-backend.up.railway.app/api
+```
+
+No serviço backend, configure pelo menos:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://seu-backend.up.railway.app
+APP_KEY=base64:...
+DB_CONNECTION=pgsql
+DB_HOST=...
+DB_PORT=5432
+DB_DATABASE=...
+DB_USERNAME=...
+DB_PASSWORD=...
+FILESYSTEM_DISK=r2
+CLOUDFLARE_R2_ACCESS_KEY_ID=...
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=...
+CLOUDFLARE_R2_BUCKET=lofi-radio-assets
+CLOUDFLARE_R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+CLOUDFLARE_R2_URL=https://<public-domain-r2>
+CORS_ALLOWED_ORIGINS=https://seu-frontend.up.railway.app
+```
+
+As chaves do R2 devem ser criadas novamente caso tenham sido expostas em qualquer commit ou log. Nunca as coloque no repositório.
+
 ## Endpoints públicos
 
 | Método | Endpoint | Descrição |

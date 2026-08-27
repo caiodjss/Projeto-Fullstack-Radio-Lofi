@@ -1,10 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\StationController;
 use App\Http\Controllers\Api\TrackController;
-use Illuminate\Support\Facades\Route;
 
-// Rota de verificação de integridade
 Route::get('/health', function () {
     return response()->json([
         'status' => 'online',
@@ -13,10 +12,12 @@ Route::get('/health', function () {
     ]);
 });
 
-// Endpoints públicos da Rádio
-Route::get('/stations', [StationController::class, 'index']);
-Route::post('/stations', [StationController::class, 'store']);
+Route::prefix('stations')->group(function () {
+    Route::get('/', [StationController::class, 'index']);
+    Route::get('/{slug}', [StationController::class, 'show']);
+});
 
-Route::get('/tracks', [TrackController::class, 'index']);
-Route::post('/tracks', [TrackController::class, 'store']);
-Route::delete('/tracks/{id}', [TrackController::class, 'destroy']);
+Route::prefix('tracks')->group(function () {
+    Route::get('/', [TrackController::class, 'index']);
+    Route::get('/{id}', [TrackController::class, 'show']);
+});

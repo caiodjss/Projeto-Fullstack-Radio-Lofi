@@ -8,32 +8,39 @@ use Illuminate\Http\JsonResponse;
 
 class StationController extends Controller
 {
-    /**
-     * Listar todas as estações ativas com suas faixas e respectivos artistas.
-     */
     public function index(): JsonResponse
     {
-        $stations = Station::where('is_active', true)
-            ->with(['tracks' => function ($query) {
-                $query->where('is_active', true)->with('artist');
-            }])
-            ->get();
+        $stations = Station::with(['tracks' => function ($query) {
+            $query->where('is_active', true)->with('artist');
+        }])
+        ->where('is_active', true)
+        ->get();
 
-        return response()->json($stations);
+        return response()->json([
+            'success' => true,
+            'data' => $stations
+        ]);
     }
 
-    /**
-     * Exibir os dados e faixas de uma estação específica pelo slug.
-     */
     public function show(string $slug): JsonResponse
     {
-        $station = Station::where('slug', $slug)
-            ->where('is_active', true)
-            ->with(['tracks' => function ($query) {
-                $query->where('is_active', true)->with('artist');
-            }])
-            ->firstOrFail();
+        $station = Station::with(['tracks' => function ($query) {
+            $query->where('is_active', true)->with('artist');
+        }])
+        ->where('slug', $slug)
+        ->where('is_active', true)
+        ->first();
 
-        return response()->json($station);
+        if (!$station) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Estação não encontrada.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $station
+        ]);
     }
 }

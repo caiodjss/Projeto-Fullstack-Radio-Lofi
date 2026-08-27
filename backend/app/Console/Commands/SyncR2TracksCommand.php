@@ -27,7 +27,7 @@ class SyncR2TracksCommand extends Command
                 [
                     'name' => 'S4D',
                     'description' => 'Melancolia Lo-Fi, batidas lentas e reflexão para dias chuvosos.',
-                    'theme_color' => '#60a5fa', // Azul sereno / melancólico
+                    'theme_color' => '#60a5fa',
                     'background_url' => "{$cdnUrl}/backgrounds/Chico_8_Bits-ANIMATION.gif",
                     'is_active' => true,
                 ]
@@ -37,7 +37,7 @@ class SyncR2TracksCommand extends Command
                 [
                     'name' => 'Nostalgic',
                     'description' => 'Ecos do passado, sintetizadores retrô e memórias em 16-bit.',
-                    'theme_color' => '#f472b6', // Rosa nostálgico
+                    'theme_color' => '#f472b6',
                     'background_url' => "{$cdnUrl}/backgrounds/Jorge_8_Bits-ANIMATION.gif",
                     'is_active' => true,
                 ]
@@ -46,7 +46,7 @@ class SyncR2TracksCommand extends Command
 
         // 2. Conectar ao disco R2 e listar arquivos de áudio
         $disk = Storage::disk('r2');
-        $files = $disk->allFiles('audio');
+        $files = $disk->allFiles('audios');
 
         $getID3 = new getID3();
 
@@ -73,7 +73,7 @@ class SyncR2TracksCommand extends Command
                 ?? $fileInfo['tags']['id3v1']['artist'][0] 
                 ?? 'Lo-Fi Artist';
 
-            $genre = $fileInfo['tags']['id3v2']['genre'][0] 
+            $rawGenre = $fileInfo['tags']['id3v2']['genre'][0]
                 ?? $fileInfo['tags']['id3v1']['genre'][0] 
                 ?? 'Sad';
 
@@ -81,13 +81,9 @@ class SyncR2TracksCommand extends Command
                 ? (int) round($fileInfo['playtime_seconds']) 
                 : 180;
 
-            // Determina a estação pelo Gênero (Normaliza 'sad' -> 'Sad', 'nostalgic' -> 'Nostalgic')
-            $targetStation = null;
-            if (stripos($genre, 'nostalgic') !== false) {
-                $targetStation = $stations['Nostalgic'];
-            } else {
-                $targetStation = $stations['Sad'];
-            }
+            // Normaliza o gênero para 'Nostalgic' ou 'Sad'
+            $genre = stripos($rawGenre, 'nostalgic') !== false ? 'Nostalgic' : 'Sad';
+            $targetStation = $stations[$genre];
 
             // 3. Cadastrar ou atualizar Artista
             $artist = Artist::firstOrCreate(
@@ -98,7 +94,7 @@ class SyncR2TracksCommand extends Command
                 ]
             );
 
-            // 4. Cadastrar ou atualizar Faixa
+            // 4. Cadastrar ou atualizar Faixa com o Genre explícito
             $audioUrl = "{$cdnUrl}/" . ltrim($file, '/');
 
             Track::updateOrCreate(
@@ -107,12 +103,13 @@ class SyncR2TracksCommand extends Command
                     'station_id' => $targetStation->id,
                     'artist_id' => $artist->id,
                     'title' => trim($title),
+                    'genre' => $genre, // <-- Salvando o gênero no banco
                     'duration_seconds' => $duration,
                     'is_active' => true,
                 ]
             );
 
-            $this->info("✔ [{$targetStation->name}] {$artist->name} - {$title} ({$duration}s)");
+            $this->info("✔ [{$targetStation->name}] [{$genre}] {$artist->name} - {$title} ({$duration}s)");
         }
 
         $this->info('Sincronização concluída com sucesso!');

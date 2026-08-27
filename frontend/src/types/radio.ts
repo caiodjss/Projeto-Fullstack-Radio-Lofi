@@ -12,6 +12,7 @@ export interface Track {
   station_id: number;
   artist_id: number;
   title: string;
+  genre: 'Sad' | 'Nostalgic' | string; // <-- Adicionado gênero tipado
   audio_url: string;
   duration_seconds: number;
   is_active: boolean;

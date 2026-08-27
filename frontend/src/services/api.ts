@@ -1,24 +1,22 @@
-/// <reference types="vite/client" />
-
 import { Station, Track } from '../types/radio';
 
-declare global {
-  interface ImportMetaEnv {
-    readonly VITE_API_URL?: string;
-  }
-
-  interface ImportMeta {
-    readonly env: ImportMetaEnv;
-  }
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
 }
 
-const baseURL = import.meta.env.VITE_API_URL || 'https://lofi-backend-production-221f.up.railway.app/api';
+const baseURL = import.meta.env.VITE_API_URL;
+
+if (!baseURL) {
+  throw new Error('VITE_API_URL precisa ser configurada antes do build do frontend.');
+}
 
 export const api = {
   get: async <T>(
     path: string,
     options?: { params?: Record<string, string | number> },
-  ): Promise<{ data: T }> => {
+  ): Promise<T> => {
     const url = new URL(`${baseURL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`);
 
     Object.entries(options?.params ?? {}).forEach(([key, value]) => {
@@ -36,30 +34,25 @@ export const api = {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
-    return { data: (await response.json()) as T };
+    const payload = (await response.json()) as ApiResponse<T>;
+    return payload.data;
   },
 };
 
-// Funções auxiliares para consumo direto
 export const radioService = {
   getStations: async (): Promise<Station[]> => {
-    const response = await api.get<Station[]>('/stations');
-    return response.data;
+    return api.get<Station[]>('/stations');
   },
 
   getStationBySlug: async (slug: string): Promise<Station> => {
-    const response = await api.get<Station>(`/stations/${slug}`);
-    return response.data;
+    return api.get<Station>(`/stations/${slug}`);
   },
 
   getTracks: async (stationId?: number): Promise<Track[]> => {
     const params: Record<string, string | number> = {};
-
     if (stationId !== undefined) {
       params.station_id = stationId;
     }
-
-    const response = await api.get<Track[]>('/tracks', { params });
-    return response.data;
+    return api.get<Track[]>('/tracks', { params });
   },
 };

@@ -9,17 +9,38 @@ use Illuminate\Http\Request;
 
 class TrackController extends Controller
 {
-    /**
-     * Listar faixas ativas, opcionalmente filtradas por station_id.
-     */
     public function index(Request $request): JsonResponse
     {
-        $query = Track::where('is_active', true)->with('artist', 'station');
+        $query = Track::with(['artist', 'station'])->where('is_active', true);
 
         if ($request->has('station_id')) {
             $query->where('station_id', $request->query('station_id'));
         }
 
-        return response()->json($query->get());
+        $tracks = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $tracks
+        ]);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $track = Track::with(['artist', 'station'])
+            ->where('is_active', true)
+            ->find($id);
+
+        if (!$track) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Faixa não encontrada.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $track
+        ]);
     }
 }

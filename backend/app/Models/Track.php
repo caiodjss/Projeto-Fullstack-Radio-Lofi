@@ -2,24 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Track extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'station_id',
         'artist_id',
         'title',
-        'audio_url',
+        'genre', // <-- Adicionado ao $fillable
         'duration_seconds',
+        'audio_url',
         'is_active',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
         'duration_seconds' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     public function station(): BelongsTo
@@ -30,10 +33,5 @@ class Track extends Model
     public function artist(): BelongsTo
     {
         return $this->belongsTo(Artist::class);
-    }
-
-    public function favorites(): HasMany
-    {
-        return $this->hasMany(Favorite::class);
     }
 }
