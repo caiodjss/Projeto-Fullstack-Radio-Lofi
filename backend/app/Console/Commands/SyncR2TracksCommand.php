@@ -35,6 +35,13 @@ class SyncR2TracksCommand extends Command
 
             $this->info('Arquivos MP3 encontrados: ' . count($files));
 
+            if ($files === []) {
+                throw new \RuntimeException(
+                    'Nenhum MP3 encontrado no prefixo audios/. Verifique CLOUDFLARE_R2_ENDPOINT, '
+                    . 'CLOUDFLARE_R2_BUCKET e as credenciais do R2.'
+                );
+            }
+
             $batchSize = max(1, (int) $this->option('batch-size'));
             $batches = array_chunk($files, $batchSize);
 
