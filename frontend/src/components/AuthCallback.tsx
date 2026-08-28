@@ -13,10 +13,11 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onSuccess, onError }
 
     if (token) {
       localStorage.setItem('auth_token', token);
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState({}, document.title, '/');
       onSuccess();
     } else if (error) {
       console.error('Falha na autenticação:', error);
+      window.history.replaceState({}, document.title, '/');
       onError();
     }
   }, [onSuccess, onError]);

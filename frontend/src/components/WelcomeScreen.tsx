@@ -5,7 +5,7 @@ interface WelcomeScreenProps {
   onContinueAsGuest: () => void;
 }
 
-const R2_BASE_URL = 'https://pub-d3a9d02dea068d88c6ed0a4b9958a368.r2.dev/backgrounds';
+const R2_BASE_URL = 'https://pub-c1380a9668c943e5b08ac47220bb1bfa.r2.dev/backgrounds';
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

@@ -4,7 +4,7 @@ import { RadioLayout } from './components/RadioLayout';
 import { AuthCallback } from './components/AuthCallback';
 import { PlayerProvider } from './context/PlayerContext';
 
-const R2_BASE_URL = 'https://pub-d3a9d02dea068d88c6ed0a4b9958a368.r2.dev/backgrounds';
+const R2_BASE_URL = 'https://pub-c1380a9668c943e5b08ac47220bb1bfa.r2.dev/backgrounds';
 
 export default function App() {
   const isAuthCallback = window.location.pathname === '/auth/callback' || window.location.search.includes('token=');

@@ -63,7 +63,11 @@ return [
             'region' => 'auto',
             'bucket' => env('CLOUDFLARE_R2_BUCKET'),
             'url' => env('CLOUDFLARE_R2_URL'),
-            'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+            'endpoint' => preg_replace(
+                '#/'.preg_quote((string) env('CLOUDFLARE_R2_BUCKET'), '#').'$#',
+                '',
+                rtrim((string) env('CLOUDFLARE_R2_ENDPOINT'), '/')
+            ),
             'use_path_style_endpoint' => true,
             'throw' => false,
         ],
