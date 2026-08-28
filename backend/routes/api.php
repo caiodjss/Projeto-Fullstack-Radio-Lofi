@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\StationController;
 use App\Http\Controllers\Api\TrackController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
     return response()->json([
@@ -10,6 +12,11 @@ Route::get('/health', function () {
         'app' => 'Lofi Radio API',
         'timestamp' => now()->toIso8601String(),
     ]);
+});
+
+Route::middleware('web')->prefix('auth')->group(function () {
+    Route::get('/google', [AuthController::class, 'redirectToGoogle']);
+    Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
 });
 
 Route::prefix('stations')->group(function () {
@@ -20,4 +27,12 @@ Route::prefix('stations')->group(function () {
 Route::prefix('tracks')->group(function () {
     Route::get('/', [TrackController::class, 'index']);
     Route::get('/{id}', [TrackController::class, 'show']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::post('/favorites/toggle/{track}', [FavoriteController::class, 'toggle']);
 });

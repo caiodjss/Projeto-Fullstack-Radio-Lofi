@@ -21,7 +21,11 @@ import {
   Minimize2,
 } from 'lucide-react';
 
-export const RadioLayout: React.FC = () => {
+interface RadioLayoutProps {
+  onLoaded?: () => void;
+}
+
+export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
   const [stations, setStations] = useState<Station[]>([]);
   const [isFetchingStations, setIsFetchingStations] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -32,6 +36,8 @@ export const RadioLayout: React.FC = () => {
   const {
     currentStation,
     currentTrack,
+    currentTime,
+    duration,
     isPlaying,
     volume,
     isMuted,
@@ -42,6 +48,7 @@ export const RadioLayout: React.FC = () => {
     previousTrack,
     setVolumeLevel,
     toggleMute,
+    seekTo,
   } = usePlayer();
 
   useEffect(() => {
@@ -53,15 +60,18 @@ export const RadioLayout: React.FC = () => {
         if (data.length > 0 && !currentStation) {
           setStation(data[0]);
         }
+
+        onLoaded?.();
       } catch (error) {
         console.error('Erro ao buscar estações:', error);
+        onLoaded?.();
       } finally {
         setIsFetchingStations(false);
       }
     };
 
     fetchStations();
-  }, []);
+  }, [currentStation, onLoaded, setStation]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -79,6 +89,8 @@ export const RadioLayout: React.FC = () => {
     const secs = Math.floor(seconds % 60);
     return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  const progressPercent = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
 
   const bgUrl = currentStation?.background_url;
   const themeColor = currentStation?.theme_color || '#38bdf8';
@@ -102,7 +114,7 @@ export const RadioLayout: React.FC = () => {
       </div>
 
       {/* 2. Top Header (Logo + Estações Horizontais + Faixas) */}
-      <header className="relative z-20 flex items-center justify-between px-6 py-4 border-b border-white/10 backdrop-blur-md bg-black/40">
+      <header className="relative z-20 flex items-center justify-between px-4 py-3 border-b border-white/10 backdrop-blur-md bg-black/40">
         
         {/* Logo */}
         <div className="flex items-center gap-3">
@@ -183,13 +195,13 @@ export const RadioLayout: React.FC = () => {
       </main>
 
       {/* 4. Player Inferior Integrado */}
-      <footer className="relative z-20 px-6 py-3.5 border-t border-white/10 backdrop-blur-xl bg-black/60 shadow-2xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
+      <footer className="relative z-20 px-4 py-2.5 border-t border-white/10 backdrop-blur-xl bg-black/60 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
 
           {/* Esquerda: Info da Faixa + Progresso */}
-          <div className="flex items-center gap-4 min-w-[240px] max-w-sm flex-1">
+          <div className="flex items-center gap-3 min-w-[220px] max-w-sm flex-1">
             {/* Capa Quadrada */}
-            <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-slate-900 shadow-md">
+            <div className="relative w-11 h-11 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-slate-900 shadow-md">
               {currentTrack?.artist?.avatar_url ? (
                 <img
                   src={currentTrack.artist.avatar_url}
@@ -205,29 +217,33 @@ export const RadioLayout: React.FC = () => {
 
             {/* Metadados & Barra de Progresso Falsa/Duração */}
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-white truncate">
+              <h3 className="text-sm font-bold text-white truncate leading-tight">
                 {currentTrack?.title || 'Sintonizando...'}
               </h3>
-              <p className="text-xs text-slate-400 truncate">
+              <p className="text-[11px] text-slate-400 truncate">
                 {currentTrack?.artist?.name || 'Lo-Fi Radio'}
               </p>
 
               {/* Linha de Tempo */}
               <div className="flex items-center gap-2 mt-1.5 text-[10px] text-slate-400 font-mono">
-                <span>01:24</span>
-                <div className="relative flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-300"
-                    style={{ width: '38%', backgroundColor: themeColor }}
-                  />
-                </div>
-                <span>{formatDuration(currentTrack?.duration_seconds)}</span>
+                <span>{formatDuration(currentTime)}</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={duration || 0}
+                  step={0.1}
+                  value={Math.min(currentTime, duration || currentTime)}
+                  onChange={(e) => seekTo(Number(e.target.value))}
+                  className="w-full h-1.5 accent-white cursor-pointer"
+                  style={{ accentColor: themeColor }}
+                />
+                <span>{formatDuration(currentTrack?.duration_seconds || duration)}</span>
               </div>
             </div>
           </div>
 
           {/* Centro: Controles de Reprodução */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={previousTrack}
