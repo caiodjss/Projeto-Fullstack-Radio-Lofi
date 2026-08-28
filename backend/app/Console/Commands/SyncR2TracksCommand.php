@@ -153,7 +153,11 @@ class SyncR2TracksCommand extends Command
                 ]
             );
 
-            $audioUrl = "{$cdnUrl}/" . ltrim($file, '/');
+            $encodedPath = implode('/', array_map(
+                static fn (string $segment): string => rawurlencode($segment),
+                explode('/', ltrim($file, '/'))
+            ));
+            $audioUrl = "{$cdnUrl}/{$encodedPath}";
 
             Track::updateOrCreate(
                 ['audio_url' => $audioUrl],

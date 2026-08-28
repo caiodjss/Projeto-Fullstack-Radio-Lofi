@@ -104,6 +104,8 @@ docker compose exec backend php artisan key:generate
 docker compose exec backend php artisan migrate --seed
 ```
 
+As estações e faixas não são mais criadas por seeder. Em produção, o backend executa `radio:sync-r2` na inicialização e sincroniza os arquivos existentes no prefixo `audios/` do Cloudflare R2.
+
 5. Acesse a aplicação frontend em [http://localhost:5173](http://localhost:5173).
 
 A API ficará disponível em [http://localhost:8000](http://localhost:8000). Os dados iniciais das estações, artistas e faixas são inseridos pelo `RadioSeeder`.
@@ -157,6 +159,8 @@ CLOUDFLARE_R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 CLOUDFLARE_R2_URL=https://<public-domain-r2>
 CORS_ALLOWED_ORIGINS=https://seu-frontend.up.railway.app
 ```
+
+`CLOUDFLARE_R2_ENDPOINT` deve conter somente o domínio `.r2.cloudflarestorage.com`, sem o nome do bucket no final. O bucket é informado separadamente em `CLOUDFLARE_R2_BUCKET`.
 
 As chaves do R2 devem ser criadas novamente caso tenham sido expostas em qualquer commit ou log. Nunca as coloque no repositório.
 
@@ -233,7 +237,7 @@ php artisan db:seed
 
 ## Mídia
 
-Os arquivos de áudio e alguns backgrounds locais ficam em `backend/public/audio` e `backend/public/backgrounds`. O seeder também utiliza algumas URLs externas para músicas e imagens de demonstração.
+Os arquivos de áudio e backgrounds de produção ficam no Cloudflare R2. O sincronizador procura arquivos MP3 no prefixo `audios/` e backgrounds no prefixo `backgrounds/`.
 
 ## Contribuição
 
