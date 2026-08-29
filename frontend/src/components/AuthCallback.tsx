@@ -8,7 +8,8 @@ interface AuthCallbackProps {
 export const AuthCallback: React.FC<AuthCallbackProps> = ({ onSuccess, onError }) => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const token = hashParams.get('token');
     const error = params.get('error');
 
     if (token) {

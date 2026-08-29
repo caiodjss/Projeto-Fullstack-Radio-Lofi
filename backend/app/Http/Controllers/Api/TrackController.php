@@ -17,7 +17,7 @@ class TrackController extends Controller
             $query->where('station_id', $request->query('station_id'));
         }
 
-        $tracks = $query->get();
+        $tracks = $query->orderBy('id')->get();
 
         return response()->json([
             'success' => true,

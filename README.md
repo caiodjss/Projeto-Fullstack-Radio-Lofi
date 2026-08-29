@@ -124,6 +124,14 @@ docker compose down -v
 
 ## Configuração da API
 
+O sincronizador de músicas é executado no boot do backend e também está agendado a cada dez minutos. Para o agendamento funcionar no Railway, crie um serviço Cron apontando para:
+
+```bash
+php artisan schedule:run
+```
+
+Configure-o para executar a cada minuto. O Laravel decidirá quando o `radio:sync-r2` deve rodar. O sync não interrompe o backend se o R2 estiver temporariamente indisponível.
+
 O frontend usa `http://localhost:8000/api` como URL padrão. Para alterar essa URL, crie `frontend/.env` com:
 
 ```env
@@ -173,6 +181,7 @@ As chaves do R2 devem ser criadas novamente caso tenham sido expostas em qualque
 | `GET` | `/api/stations/{slug}` | Retorna uma estação ativa pelo slug |
 | `GET` | `/api/tracks` | Lista faixas ativas |
 | `GET` | `/api/tracks?station_id={id}` | Filtra faixas por estação |
+| `GET` | `/api/stations/{slug}/now-playing` | Retorna faixa atual e offset da rádio |
 
 Exemplo:
 

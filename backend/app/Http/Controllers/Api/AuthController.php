@@ -23,7 +23,7 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Throwable $th) {
-            return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/?error=google_auth_failed');
+            return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/auth/callback?error=google_auth_failed');
         }
 
         $user = User::query()->firstOrCreate(
@@ -41,7 +41,7 @@ class AuthController extends Controller
 
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
 
-        return redirect($frontendUrl . '/auth/callback?token=' . urlencode($token));
+        return redirect($frontendUrl . '/auth/callback#token=' . urlencode($token));
     }
 
     public function me(Request $request): JsonResponse

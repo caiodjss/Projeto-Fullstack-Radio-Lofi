@@ -120,7 +120,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
 
         {/* Rodapé */}
         <p className="text-[11px] text-slate-400/60 mt-6">
-          Sem registos demorados. Inicia sessão a qualquer momento para guardares os teus favoritos.
+          Sem registos demorados. Inicia sessão a qualquer momento para salvar as faixas favoritas.
         </p>
       </div>
     </div>

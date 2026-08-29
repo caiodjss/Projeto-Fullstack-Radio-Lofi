@@ -3,20 +3,14 @@ import { AudioVisualizer } from './AudioVisualizer';
 import { usePlayer } from '../context/PlayerContext';
 import { radioService } from '../services/api';
 import type { Station } from '../types/radio';
-import { TrackDrawer } from './TrackDrawer';
-import { useFavorites } from '../hooks/useFavorites';
+import { SideMenu } from './SideMenu';
 import {
   Play,
-  Pause,
-  SkipForward,
-  SkipBack,
   Volume2,
   VolumeX,
   Radio,
   Music2,
   Loader2,
-  Heart,
-  ListMusic,
   Maximize2,
   Minimize2,
 } from 'lucide-react';
@@ -28,27 +22,20 @@ interface RadioLayoutProps {
 export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
   const [stations, setStations] = useState<Station[]>([]);
   const [isFetchingStations, setIsFetchingStations] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const { isFavorite, toggleFavorite } = useFavorites();
 
   const {
     currentStation,
     currentTrack,
-    currentTime,
-    duration,
     isPlaying,
     volume,
     isMuted,
     isLoading,
+    playTrack,
     setStation,
     togglePlay,
-    nextTrack,
-    previousTrack,
     setVolumeLevel,
     toggleMute,
-    seekTo,
   } = usePlayer();
 
   useEffect(() => {
@@ -83,22 +70,13 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
     }
   };
 
-  const formatDuration = (seconds?: number) => {
-    if (!seconds) return '00:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
-  const progressPercent = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
-
   const bgUrl = currentStation?.background_url;
   const themeColor = currentStation?.theme_color || '#38bdf8';
   const slug = currentStation?.slug;
 
   return (
-    <div className="relative h-screen w-screen flex flex-col justify-between overflow-hidden bg-slate-950 text-white font-sans select-none">
-      
+    <div className="relative h-[100dvh] min-h-[560px] w-screen flex flex-col overflow-hidden bg-slate-950 text-white font-mono select-none">
+
       {/* 1. Camada de Fundo (GIF em Pixel Art) */}
       <div className="absolute inset-0 w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden z-0">
         {bgUrl && (
@@ -114,24 +92,24 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
       </div>
 
       {/* 2. Top Header (Logo + Estações Horizontais + Faixas) */}
-      <header className="relative z-20 flex items-center justify-between px-4 py-3 border-b border-white/10 backdrop-blur-md bg-black/40">
+      <header className="relative z-20 flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-4 border-b border-cyan-300/20 backdrop-blur-md bg-[#070b1f]/90 shadow-[0_0_24px_rgba(34,211,238,0.12)]">
         
         {/* Logo */}
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-colors duration-500"
+            className="w-10 h-10 rounded-lg flex items-center justify-center shadow-[0_0_18px_rgba(34,211,238,0.55)] transition-colors duration-500"
             style={{ backgroundColor: themeColor }}
           >
             <Radio className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-sm sm:text-base tracking-wider leading-none">LO-FI RADIO</h1>
-            <p className="text-[11px] text-slate-300 mt-1">Continuous Beats & Atmospheres</p>
+            <h1 className="font-bold text-sm sm:text-base tracking-wider leading-none text-cyan-100 [text-shadow:0_0_10px_rgba(34,211,238,0.8)]">LO-FI RADIO</h1>
+            <p className="text-[10px] text-pink-300 mt-1 tracking-[0.18em]">8-BIT SIGNAL</p>
           </div>
         </div>
 
         {/* Seletor Horizontal de Estações */}
-        <nav className="hidden md:flex items-center gap-2">
+        <nav className="order-3 flex w-full items-center gap-2 overflow-x-auto pb-1 md:order-none md:w-auto md:overflow-visible md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {isFetchingStations ? (
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <Loader2 className="w-4 h-4 animate-spin" /> Carregando...
@@ -144,10 +122,10 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
                   key={station.id}
                   type="button"
                   onClick={() => setStation(station)}
-                  className={`px-3.5 py-2 rounded-xl border text-left transition-all duration-200 flex flex-col backdrop-blur-md cursor-pointer ${
+                  className={`shrink-0 px-3.5 py-2 rounded-lg border text-left transition-all duration-200 flex flex-col bg-[#0b1230]/90 cursor-pointer ${
                     isSelected
-                      ? 'bg-white/15 border-sky-400 shadow-md scale-102'
-                      : 'bg-black/30 border-white/10 hover:bg-white/10 hover:border-white/20'
+                      ? 'border-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.45)]'
+                      : 'border-white/15 hover:bg-[#15204a] hover:border-pink-300/60'
                   }`}
                   style={isSelected ? { borderColor: station.theme_color } : {}}
                 >
@@ -171,19 +149,12 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
           )}
         </nav>
 
-        {/* Botão Gaveta de Faixas */}
-        <button
-          type="button"
-          onClick={() => setIsDrawerOpen(true)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/10 hover:bg-white/20 text-slate-100 transition-colors text-xs font-medium backdrop-blur-md cursor-pointer"
-        >
-          <ListMusic className="w-4 h-4" />
-          <span>Faixas</span>
-        </button>
+        {/* Menu lateral */}
+        <SideMenu onSelectTrack={playTrack} />
       </header>
 
       {/* 3. Área Central (Visualizador de Ondas na base do GIF) */}
-      <main className="relative z-10 flex-1 flex flex-col justify-end items-center pb-2 px-4 pointer-events-none">
+      <main className="relative z-10 min-h-0 flex-1 flex flex-col justify-end items-center pb-2 px-3 sm:px-4 pointer-events-none">
         <div className="w-full max-w-5xl">
           <AudioVisualizer
             isPlaying={isPlaying}
@@ -195,13 +166,13 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
       </main>
 
       {/* 4. Player Inferior Integrado */}
-      <footer className="relative z-20 px-4 py-2.5 border-t border-white/10 backdrop-blur-xl bg-black/60 shadow-2xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <footer className="relative z-20 shrink-0 px-3 py-3 sm:px-4 sm:py-2.5 border-t border-pink-300/20 backdrop-blur-xl bg-[#070b1f]/95 shadow-[0_-8px_30px_rgba(15,23,42,0.8)]">
+        <div className="max-w-7xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 
           {/* Esquerda: Info da Faixa + Progresso */}
-          <div className="flex items-center gap-3 min-w-[220px] max-w-sm flex-1">
+          <div className="flex items-center gap-3 w-full min-w-0 sm:max-w-sm sm:flex-1">
             {/* Capa Quadrada */}
-            <div className="relative w-11 h-11 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-slate-900 shadow-md">
+            <div className="relative w-11 h-11 rounded-md overflow-hidden border border-cyan-300/40 flex-shrink-0 bg-slate-900 shadow-[0_0_12px_rgba(34,211,238,0.25)]">
               {currentTrack?.artist?.avatar_url ? (
                 <img
                   src={currentTrack.artist.avatar_url}
@@ -215,90 +186,41 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
               )}
             </div>
 
-            {/* Metadados & Barra de Progresso Falsa/Duração */}
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-white truncate leading-tight">
+            {/* Metadados da faixa */}
+            <div className="min-w-0 flex-1 sm:text-left">
+              <h3 className="text-sm font-bold text-white truncate leading-tight text-left sm:text-center">
                 {currentTrack?.title || 'Sintonizando...'}
               </h3>
-              <p className="text-[11px] text-slate-400 truncate">
+              <p className="text-[11px] text-slate-400 truncate text-left sm:text-center">
                 {currentTrack?.artist?.name || 'Lo-Fi Radio'}
               </p>
 
-              {/* Linha de Tempo */}
-              <div className="flex items-center gap-2 mt-1.5 text-[10px] text-slate-400 font-mono">
-                <span>{formatDuration(currentTime)}</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 0}
-                  step={0.1}
-                  value={Math.min(currentTime, duration || currentTime)}
-                  onChange={(e) => seekTo(Number(e.target.value))}
-                  className="w-full h-1.5 accent-white cursor-pointer"
-                  style={{ accentColor: themeColor }}
-                />
-                <span>{formatDuration(currentTrack?.duration_seconds || duration)}</span>
-              </div>
             </div>
           </div>
 
           {/* Centro: Controles de Reprodução */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={previousTrack}
-              className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-              title="Anterior"
-            >
-              <SkipBack className="w-5 h-5" />
-            </button>
-
+          <div className="flex w-full items-center justify-center gap-3 sm:w-auto sm:order-2">
             <button
               type="button"
               onClick={togglePlay}
               disabled={isLoading}
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-[0_0_20px_rgba(34,211,238,0.45)] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
               style={{ backgroundColor: themeColor }}
-              title={isPlaying ? 'Pausar' : 'Tocar'}
+              title={isPlaying ? 'Parar' : 'Entrar na rádio'}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : isPlaying ? (
-                <Pause className="w-5 h-5" />
+                <span className="block w-4 h-4 border-2 border-white rounded-sm" />
               ) : (
                 <Play className="w-5 h-5 ml-0.5" />
               )}
             </button>
 
-            <button
-              type="button"
-              onClick={nextTrack}
-              className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-              title="Próxima"
-            >
-              <SkipForward className="w-5 h-5" />
-            </button>
-
-            {currentTrack && (
-              <button
-                type="button"
-                onClick={() => toggleFavorite(currentTrack)}
-                className="p-2 rounded-full transition-transform active:scale-90 hover:bg-white/10 cursor-pointer"
-                title={isFavorite(currentTrack.id) ? 'Desfavoritar' : 'Favoritar'}
-              >
-                <Heart
-                  className={`w-5 h-5 transition-colors ${
-                    isFavorite(currentTrack.id)
-                      ? 'fill-rose-500 text-rose-500'
-                      : 'text-slate-400 hover:text-rose-400'
-                  }`}
-                />
-              </button>
-            )}
           </div>
 
           {/* Direita: Volume & Fullscreen */}
-          <div className="flex items-center gap-3 w-48 justify-end">
+          <div className="flex w-full items-center justify-center gap-3 sm:order-3 sm:w-48 sm:justify-end">
             <button
               type="button"
               onClick={toggleMute}
@@ -310,16 +232,6 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
                 <Volume2 className="w-5 h-5" />
               )}
             </button>
-
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => setVolumeLevel(parseFloat(e.target.value))}
-              className="w-24 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
-            />
 
             <button
               type="button"
@@ -334,11 +246,6 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
         </div>
       </footer>
 
-      {/* Drawer Lateral */}
-      <TrackDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-      />
     </div>
   );
 };

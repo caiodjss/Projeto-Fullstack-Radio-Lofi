@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { historyService, radioService } from '../services/api';
 import { Station, Track } from '../types/radio';
 
 interface PlayerContextType {
@@ -13,8 +14,6 @@ interface PlayerContextType {
   isLoading: boolean;
   playTrack: (track: Track) => void;
   togglePlay: () => void;
-  nextTrack: () => void;
-  previousTrack: () => void;
   setStation: (station: Station) => void;
   setVolumeLevel: (vol: number) => void;
   toggleMute: () => void;
@@ -34,8 +33,20 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [volume, setVolume] = useState<number>(0.7);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const currentTrack = queue[currentIndex] || null;
+  const queueRef = useRef(queue);
+  const currentStationRef = useRef(currentStation);
+  const currentTrackRef = useRef<Track | null>(currentTrack);
+  const shouldPlayRef = useRef(false);
+  const pendingOffsetRef = useRef(0);
+  const stationRequestRef = useRef(0);
+  const failedTrackIdsRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    queueRef.current = queue;
+    currentStationRef.current = currentStation;
+    currentTrackRef.current = currentTrack;
+  }, [currentStation, currentTrack, queue]);
 
   // Inicializa o elemento HTML5 Audio único
   useEffect(() => {
@@ -48,8 +59,11 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const handlePlaying = () => {
       setIsLoading(false);
       setIsPlaying(true);
+      if (currentTrackRef.current) failedTrackIdsRef.current.delete(currentTrackRef.current.id);
     };
-    const handlePause = () => setIsPlaying(false);
+    const handlePause = () => {
+      if (!shouldPlayRef.current) setIsPlaying(false);
+    };
     const handleTimeUpdate = () => {
       if (audio.currentTime) setCurrentTime(audio.currentTime);
     };
@@ -58,12 +72,17 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setCurrentTime(audio.currentTime || 0);
     };
     const handleEnded = () => {
-      nextTrack();
+      void refreshNowPlaying(true);
     };
     const handleError = () => {
       setIsLoading(false);
-      setIsPlaying(false);
-      nextTrack();
+      if (currentTrackRef.current) failedTrackIdsRef.current.add(currentTrackRef.current.id);
+      if (queueRef.current.some((track) => !failedTrackIdsRef.current.has(track.id))) {
+        void refreshNowPlaying(true);
+      } else {
+        shouldPlayRef.current = false;
+        setIsPlaying(false);
+      }
     };
 
     audio.addEventListener('waiting', handleWaiting);
@@ -86,7 +105,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, []);
 
-  // Atualiza o source e inicia reprodução quando o currentTrack muda
+  // Troca a faixa sem confundir a pausa da troca de source com o Stop manual.
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;
 
@@ -94,31 +113,99 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     audioRef.current.load();
     setCurrentTime(0);
     setDuration(currentTrack.duration_seconds || 0);
+    const offset = Math.max(0, pendingOffsetRef.current);
+    pendingOffsetRef.current = 0;
 
-    if (isPlaying) {
+    if (shouldPlayRef.current) {
       setIsLoading(true);
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        if (offset > 0 && offset < audioRef.current!.duration) {
+          audioRef.current!.currentTime = offset;
+          setCurrentTime(offset);
+        }
+      }, { once: true });
       audioRef.current
         .play()
-        .catch(() => setIsPlaying(false));
+        .catch(() => {
+          shouldPlayRef.current = false;
+          setIsPlaying(false);
+        });
     }
-  }, [currentIndex, queue, currentTrack, isPlaying]);
+  }, [currentIndex, queue, currentTrack]);
+
+  const refreshNowPlaying = async (autoplay: boolean) => {
+    const station = currentStationRef.current;
+    if (!station) return;
+
+    const requestId = ++stationRequestRef.current;
+    try {
+      const nowPlaying = await radioService.getNowPlaying(station.slug);
+      if (requestId !== stationRequestRef.current) return;
+
+      const tracks = nowPlaying.station.tracks || station.tracks || [nowPlaying.track];
+      const serverIndex = tracks.findIndex((track) => track.id === nowPlaying.track.id);
+      const fallbackTrack = autoplay && failedTrackIdsRef.current.has(nowPlaying.track.id)
+        ? tracks.slice(serverIndex + 1).concat(tracks.slice(0, serverIndex)).find(
+          (track) => !failedTrackIdsRef.current.has(track.id)
+        )
+        : nowPlaying.track;
+      const nextIndex = fallbackTrack ? tracks.findIndex((track) => track.id === fallbackTrack.id) : -1;
+      if (nextIndex === -1) return;
+
+      const selectedTrack = fallbackTrack as Track;
+
+      pendingOffsetRef.current = selectedTrack.id === nowPlaying.track.id ? nowPlaying.offset_seconds : 0;
+      queueRef.current = tracks;
+      setCurrentStation(nowPlaying.station);
+      setQueue(tracks);
+      setCurrentIndex(nextIndex);
+      setCurrentTime(pendingOffsetRef.current);
+      setDuration(selectedTrack.duration_seconds || 0);
+      shouldPlayRef.current = autoplay;
+      setIsPlaying(autoplay);
+    } catch (error) {
+      console.error('Erro ao sincronizar faixa atual:', error);
+      if (autoplay) setIsPlaying(false);
+    }
+  };
+
+  const recordedTrackId = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isPlaying || !currentTrack || recordedTrackId.current === currentTrack.id) return;
+    recordedTrackId.current = currentTrack.id;
+    if (localStorage.getItem('auth_token')) {
+      historyService.recordPlay(currentTrack.id).catch((error) => {
+        console.error('Erro ao registrar histórico:', error);
+      });
+    }
+  }, [currentTrack, isPlaying]);
 
   const togglePlay = () => {
     if (!audioRef.current || !currentTrack) return;
 
     if (isPlaying) {
+      shouldPlayRef.current = false;
       audioRef.current.pause();
+      audioRef.current.currentTime = 0;
       setIsPlaying(false);
+      recordedTrackId.current = null;
     } else {
+      shouldPlayRef.current = true;
       setIsLoading(true);
       audioRef.current
         .play()
         .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+        .catch(() => {
+          shouldPlayRef.current = false;
+          setIsPlaying(false);
+        });
     }
   };
 
   const setStation = (station: Station) => {
+    stationRequestRef.current++;
+    currentStationRef.current = station;
     setCurrentStation(station);
     const tracks = station.tracks || [];
     setQueue(tracks);
@@ -126,9 +213,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCurrentTime(0);
     setDuration(tracks[0]?.duration_seconds || 0);
 
-    if (tracks.length > 0) {
-      setIsPlaying(true);
-    }
+    pendingOffsetRef.current = 0;
+    shouldPlayRef.current = tracks.length > 0;
+    setIsPlaying(tracks.length > 0);
+    if (tracks.length > 0) void refreshNowPlaying(true);
   };
 
   const playTrack = (track: Track) => {
@@ -141,23 +229,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
     setCurrentTime(0);
     setDuration(track.duration_seconds || 0);
+    shouldPlayRef.current = true;
     setIsPlaying(true);
-  };
-
-  const nextTrack = () => {
-    if (queue.length === 0) return;
-    const nextIndex = (currentIndex + 1) % queue.length;
-    setCurrentIndex(nextIndex);
-    setCurrentTime(0);
-    setDuration(queue[nextIndex]?.duration_seconds || 0);
-  };
-
-  const previousTrack = () => {
-    if (queue.length === 0) return;
-    const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
-    setCurrentIndex(prevIndex);
-    setCurrentTime(0);
-    setDuration(queue[prevIndex]?.duration_seconds || 0);
   };
 
   const setVolumeLevel = (vol: number) => {
@@ -199,8 +272,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         isLoading,
         playTrack,
         togglePlay,
-        nextTrack,
-        previousTrack,
         setStation,
         setVolumeLevel,
         toggleMute,

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Station extends Model
 {
@@ -26,5 +27,10 @@ class Station extends Model
     public function tracks(): HasMany
     {
         return $this->hasMany(Track::class);
+    }
+
+    public function radioState(): HasOne
+    {
+        return $this->hasOne(RadioStationState::class);
     }
 }

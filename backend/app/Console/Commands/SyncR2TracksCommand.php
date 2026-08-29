@@ -64,12 +64,6 @@ class SyncR2TracksCommand extends Command
 
             $this->info("Sincronização finalizada: {$processed} processadas, {$failed} falhas.");
 
-            if ($failed > 0) {
-                $this->error('A sincronização terminou com falhas. Verifique o erro acima antes de reproduzir as músicas.');
-
-                return Command::FAILURE;
-            }
-
             return Command::SUCCESS;
         } catch (Exception $e) {
             $this->error('Erro ao sincronizar arquivos de R2: ' . $e->getMessage());

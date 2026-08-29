@@ -31,7 +31,7 @@ export const api = {
     return payload.data;
   },
 
-  post: async <T>(path: string, body?: any): Promise<T> => {
+  post: async <T>(path: string, body?: unknown): Promise<T> => {
     const url = `${baseURL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
     const token = localStorage.getItem('auth_token');
     const headers: Record<string, string> = {
@@ -66,12 +66,32 @@ export const favoriteService = {
     api.post(`/favorites/toggle/${trackId}`),
 };
 
+export interface HistoryEntry {
+  id: number;
+  played_at: string;
+  track: Track;
+}
+
+export const historyService = {
+  getHistory: (): Promise<HistoryEntry[]> => api.get<HistoryEntry[]>('/history'),
+  recordPlay: (trackId: number): Promise<HistoryEntry> =>
+    api.post<HistoryEntry>('/history', { track_id: trackId }),
+};
+
 export const radioService = {
   getStations: (): Promise<Station[]> => api.get<Station[]>('/stations'),
   getStationBySlug: (slug: string): Promise<Station> => api.get<Station>(`/stations/${slug}`),
+  getNowPlaying: (slug: string): Promise<NowPlaying> => api.get<NowPlaying>(`/stations/${slug}/now-playing`),
   getTracks: (stationId?: number): Promise<Track[]> => {
     const params: Record<string, string | number> = {};
     if (stationId !== undefined) params.station_id = stationId;
     return api.get<Track[]>('/tracks', { params });
   },
 };
+
+export interface NowPlaying {
+  station: Station;
+  track: Track;
+  offset_seconds: number;
+  cycle_started_at: string;
+}
