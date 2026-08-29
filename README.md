@@ -245,7 +245,3 @@ Os arquivos de áudio e backgrounds de produção ficam no Cloudflare R2. O sinc
 2. Faça as mudanças e adicione testes quando necessário.
 3. Verifique o lint do frontend e os testes do backend.
 4. Abra um pull request descrevendo o que foi alterado.
-
-## Licença
-
-O backend utiliza a licença MIT em sua configuração. Para formalizar a licença do repositório no GitHub, adicione um arquivo `LICENSE` na raiz do projeto.

@@ -44,6 +44,8 @@ class SyncR2TracksCommand extends Command
 
             $batchSize = max(1, (int) $this->option('batch-size'));
             $batches = array_chunk($files, $batchSize);
+            $processed = 0;
+            $failed = 0;
 
             foreach ($batches as $index => $batch) {
                 $this->info(sprintf('Processando lote %d/%d', $index + 1, count($batches)));
@@ -52,13 +54,21 @@ class SyncR2TracksCommand extends Command
                 foreach ($batch as $file) {
                     try {
                         $this->syncTrackFile($file, $stations, $cdnUrl, $disk);
+                        $processed++;
                     } catch (Exception $e) {
+                        $failed++;
                         $this->warn("Falha ao processar {$file}: {$e->getMessage()}");
                     }
                 }
             }
 
-            $this->info('Sincronização concluída com sucesso!');
+            $this->info("Sincronização finalizada: {$processed} processadas, {$failed} falhas.");
+
+            if ($failed > 0) {
+                $this->error('A sincronização terminou com falhas. Verifique o erro acima antes de reproduzir as músicas.');
+
+                return Command::FAILURE;
+            }
 
             return Command::SUCCESS;
         } catch (Exception $e) {
