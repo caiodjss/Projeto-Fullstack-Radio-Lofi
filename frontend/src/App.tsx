@@ -58,7 +58,7 @@ export default function App() {
               alt="Carregando..."
               className="w-56 h-56 sm:w-72 sm:h-72 object-cover rounded-3xl shadow-2xl border border-pink-500/30 filter drop-shadow-[0_0_30px_rgba(236,72,153,0.4)]"
             />
-            <p className="mt-6 text-xs sm:text-sm font-semibold tracking-widest uppercase text-pink-300 animate-pulse">
+            <p className="mt-6 text-xs sm:text-sm font-semibold tracking-widest uppercase text-pink-300 animate-pulse-slow">
               Sintonizando batidas...
             </p>
           </div>

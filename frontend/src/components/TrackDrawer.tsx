@@ -106,9 +106,9 @@ export const TrackDrawer: FC<TrackDrawerProps> = ({ isOpen, onClose }) => {
                     <span className="text-xs font-mono text-slate-500 w-4 text-center">
                       {isCurrent && isPlaying ? (
                         <span className="flex gap-0.5 justify-center items-end h-3.5">
-                          <span className="w-1 bg-white animate-pulse h-2" />
-                          <span className="w-1 bg-white animate-pulse h-3.5" />
-                          <span className="w-1 bg-white animate-pulse h-1.5" />
+                          <span className="w-1 bg-white animate-pulse-slow h-2" />
+                          <span className="w-1 bg-white animate-pulse-slow h-3.5" />
+                          <span className="w-1 bg-white animate-pulse-slow h-1.5" />
                         </span>
                       ) : (
                         index + 1

@@ -132,7 +132,7 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
                   <div className="flex items-center gap-2">
                     {isSelected && (
                       <span
-                        className="w-1.5 h-1.5 rounded-full animate-pulse"
+                        className="w-1.5 h-1.5 rounded-full animate-pulse-slow"
                         style={{ backgroundColor: station.theme_color }}
                       />
                     )}

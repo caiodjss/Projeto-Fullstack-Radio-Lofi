@@ -32,11 +32,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
       <img
         src={`${R2_BASE_URL}/lofi-vaporwave-ANIMATION.gif`}
         alt="Lofi Vaporwave Background"
-        className="absolute inset-0 w-full h-full object-cover object-center filter brightness-75 scale-105 transition-all duration-1000"
+        className="absolute inset-0 w-full h-full object-cover object-center filter brightness-75 blur-sm scale-105 transition-all duration-1000"
       />
 
       {/* 2. Overlay com Gradiente para Contraste */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-slate-950/60 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/50 to-slate-950/70 backdrop-blur-sm" />
 
       {/* 3. Camada do GIF de Loading (Aparece com Fade In / Scale a partir do centro) */}
       <div
@@ -50,7 +50,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
           <img
             src={`${R2_BASE_URL}/vaporwave-loading-ANIMATION.gif`}
             alt="A carregar..."
-            className="w-56 h-56 sm:w-72 sm:h-72 object-cover rounded-3xl shadow-2xl border border-pink-500/30 filter drop-shadow-[0_0_25px_rgba(236,72,153,0.3)] animate-pulse"
+            className="w-56 h-56 sm:w-72 sm:h-72 object-cover rounded-3xl shadow-2xl border border-pink-500/30 filter drop-shadow-[0_0_25px_rgba(236,72,153,0.3)] animate-pulse-slow"
           />
           <p className="mt-6 text-sm font-semibold tracking-widest uppercase text-pink-300 drop-shadow">
             A sintonizar frequências...
@@ -66,7 +66,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
       >
         {/* Badge */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-medium tracking-wide uppercase mb-4">
-          <Sparkles size={13} className="animate-pulse" />
+          <Sparkles size={13} className="animate-pulse-slow" />
           <span>💛</span>
         </div>
 
@@ -120,10 +120,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
 
         {/* Rodapé */}
         <p className="text-[11px] text-slate-400/60 mt-6">
-          Sugestões e feedback? <a href="mailto: cdj@outlook.com.br" className="text-pink-400 hover:underline">Entre em contato</a>
+          Sugestões e feedback? Entre em contato no email cdj@outlook.com.br
         </p>
         <p className="text-[11px] text-slate-400/60 mt-1">
-          Desenvolvido por <a href="https://caiodjss.github.io/bratso/" className="text-pink-400 hover:underline">Bratso</a>
+          Desenvolvido por <a href="https://caiodjss.github.io/bratso/" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">Bratso</a>
         </p>
         <p className="text-[11px] text-slate-400/60 mt-1">
           &copy; 2026 Radio Lo-Fi. Todos os direitos reservados.

@@ -26,7 +26,7 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onSuccess, onError }
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-pink-300">
       <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-sm font-semibold tracking-wider uppercase animate-pulse">
+      <p className="text-sm font-semibold tracking-wider uppercase animate-pulse-slow">
         Autenticando com o Google...
       </p>
     </div>
