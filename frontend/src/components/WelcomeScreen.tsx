@@ -67,15 +67,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
         {/* Badge */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-medium tracking-wide uppercase mb-4">
           <Sparkles size={13} className="animate-pulse" />
-          <span>Lo-Fi Beats 24/7</span>
+          <span>💛</span>
         </div>
 
         {/* Título & Slogan */}
         <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-pink-200 to-indigo-200 tracking-tight mb-2 drop-shadow">
-          Chilled Vibes
+          Radio Lo-Fi
         </h1>
         <p className="text-slate-300/80 text-sm sm:text-base mb-8 max-w-xs leading-relaxed">
-          Relaxa, estuda ou aprecia batidas nostálgicas e melancólicas.
+          Em breve uma rádio completa e do seu jeito.
         </p>
 
         {/* Botões de Ação */}
@@ -120,9 +120,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinueAsGuest 
 
         {/* Rodapé */}
         <p className="text-[11px] text-slate-400/60 mt-6">
-          Sem registos demorados. Inicia sessão a qualquer momento para salvar as faixas favoritas.
+          Sugestões e feedback? <a href="mailto: cdj@outlook.com.br" className="text-pink-400 hover:underline">Entre em contato</a>
+        </p>
+        <p className="text-[11px] text-slate-400/60 mt-1">
+          Desenvolvido por <a href="https://caiodjss.github.io/bratso/" className="text-pink-400 hover:underline">Bratso</a>
+        </p>
+        <p className="text-[11px] text-slate-400/60 mt-1">
+          &copy; 2026 Radio Lo-Fi. Todos os direitos reservados.
         </p>
       </div>
+
     </div>
   );
 };
