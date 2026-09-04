@@ -1,0 +1,36 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Lofi Radio API",
+        "description": "Documentação da API da Rádio Lo-Fi",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Verifica a saúde da API",
+                "operationId": "f61ec9be4340d5f6e4fad01d743442ce",
+                "responses": {
+                    "200": {
+                        "description": "API online"
+                    }
+                },
+                "servers": [
+                    {
+                        "url": "http://localhost:8000",
+                        "description": "Servidor Local"
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Health",
+            "description": "Health"
+        }
+    ]
+}
