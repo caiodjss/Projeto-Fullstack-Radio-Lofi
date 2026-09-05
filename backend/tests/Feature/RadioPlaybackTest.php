@@ -22,14 +22,39 @@ class RadioPlaybackTest extends TestCase
         $artist = Artist::create(['name' => 'Test Artist']);
         $first = Track::create(['station_id' => $station->id, 'artist_id' => $artist->id, 'title' => 'First', 'genre' => 'Sad', 'audio_url' => 'https://example.com/first.mp3', 'duration_seconds' => 60, 'is_active' => true]);
         $second = Track::create(['station_id' => $station->id, 'artist_id' => $artist->id, 'title' => 'Second', 'genre' => 'Sad', 'audio_url' => 'https://example.com/second.mp3', 'duration_seconds' => 120, 'is_active' => true]);
-        RadioStationState::create(['station_id' => $station->id, 'cycle_started_at' => Carbon::now()->subSeconds(75)]);
+        RadioStationState::create([
+            'station_id' => $station->id,
+            'current_track_id' => $first->id,
+            'queue' => [$first->id, $second->id],
+            'cycle_started_at' => Carbon::now()->subSeconds(75),
+            'status' => 'playing',
+            'playback_position_seconds' => 0,
+        ]);
+
+        app(\App\Services\Radio\RadioPlaybackService::class)->tickStation($station);
 
         $response = $this->getJson('/api/stations/test-radio/now-playing');
 
         $response->assertOk()
             ->assertJsonPath('data.track.id', $second->id)
+            ->assertJsonPath('data.next_track.id', $first->id)
             ->assertJsonPath('data.offset_seconds', 15);
         $this->assertNotSame($first->id, $response->json('data.track.id'));
+    }
+
+    public function test_now_playing_does_not_create_radio_state(): void
+    {
+        $station = Station::create([
+            'name' => 'Uninitialized Radio',
+            'slug' => 'uninitialized-radio',
+            'theme_color' => '#38bdf8',
+            'is_active' => true,
+        ]);
+
+        $response = $this->getJson('/api/stations/uninitialized-radio/now-playing');
+
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('radio_station_states', ['station_id' => $station->id]);
     }
 
     public function test_authenticated_user_can_record_and_fetch_history(): void

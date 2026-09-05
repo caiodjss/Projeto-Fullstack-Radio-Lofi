@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AudioVisualizer } from './AudioVisualizer';
 import { usePlayer } from '../context/PlayerContext';
 import { radioService } from '../services/api';
@@ -23,6 +23,7 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
   const [stations, setStations] = useState<Station[]>([]);
   const [isFetchingStations, setIsFetchingStations] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const hasFetchedStationsRef = useRef(false);
 
   const {
     currentStation,
@@ -39,6 +40,9 @@ export const RadioLayout: React.FC<RadioLayoutProps> = ({ onLoaded }) => {
   } = usePlayer();
 
   useEffect(() => {
+    if (hasFetchedStationsRef.current) return;
+    hasFetchedStationsRef.current = true;
+
     const fetchStations = async () => {
       try {
         const data = await radioService.getStations();

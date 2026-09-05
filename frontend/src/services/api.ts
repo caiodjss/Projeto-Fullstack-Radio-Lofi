@@ -92,6 +92,9 @@ export const radioService = {
 export interface NowPlaying {
   station: Station;
   track: Track;
+  next_track: Track | null;
   offset_seconds: number;
   cycle_started_at: string;
+  status: 'playing' | 'stopped';
+  last_heartbeat_at: string | null;
 }
